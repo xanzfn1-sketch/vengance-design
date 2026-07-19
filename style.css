@@ -310,6 +310,67 @@ button{ font-family:inherit; background:none; border:none; cursor:pointer; color
 }
 
 /* ============================================================
+   GROWTH / BEFORE-AFTER CHART
+   ============================================================ */
+.growth{ padding:6rem 0 8rem; max-width:var(--container); margin:0 auto; }
+
+.growth__chart-card{
+  margin:0 2.5rem;
+  background:var(--ink-2);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:2.6rem 2.6rem 2rem;
+}
+
+.growth__svg{ width:100%; height:auto; display:block; overflow:visible; }
+.growth__grid line{ stroke:var(--line); stroke-width:1; }
+
+.growth__marker{ stroke:var(--line-2); stroke-width:1; }
+.growth__marker-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:.06em;
+  fill:var(--text-dim);
+}
+
+.growth__line{ stroke-dasharray:1; stroke-dashoffset:1; }
+.growth__dot{ fill:var(--brass-2); filter:drop-shadow(0 0 6px rgba(231,206,147,.7)); opacity:0; }
+
+.growth__label{
+  font-family:var(--font-mono);
+  font-size:13px;
+  letter-spacing:.1em;
+}
+.growth__label--before{ fill:var(--text-dim); }
+.growth__label--after{ fill:var(--brass-2); font-weight:600; }
+
+.growth__stat-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:2rem;
+  flex-wrap:wrap;
+  margin-top:1.6rem;
+  padding-top:1.8rem;
+  border-top:1px solid var(--line);
+}
+.stat__value--lg{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:2.6rem;
+  color:var(--brass);
+  display:block;
+}
+.growth__stat-row .stat__label{ display:block; margin-top:.4rem; }
+.growth__note{ color:var(--text-muted); font-size:.92rem; max-width:280px; text-align:right; }
+
+@media (max-width:640px){
+  .growth__chart-card{ margin:0 1.5rem; padding:1.8rem 1.4rem 1.6rem; }
+  .growth__note{ text-align:left; }
+  .growth__stat-row{ flex-direction:column; align-items:flex-start; }
+}
+
+/* ============================================================
    PROOF / TILT CARDS
    ============================================================ */
 .proof{ padding:6rem 0 9rem; max-width:var(--container); margin:0 auto; }
