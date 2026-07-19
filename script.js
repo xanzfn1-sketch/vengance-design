@@ -1,4 +1,4 @@
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -110,6 +110,55 @@ if(!reduceMotion){
       rotX(0); rotY(0);
     });
   });
+}
+
+/* ============================================================
+   GROWTH CHART — BEFORE / AFTER, DRAWN AS YOU SCROLL
+   ============================================================ */
+const growthLine = document.querySelector('.growth__line');
+
+if(growthLine){
+  const growthArea = document.querySelector('.growth__area');
+  const growthDot   = document.querySelector('.growth__dot');
+  const growthCard  = document.querySelector('.growth__chart-card');
+  const counterEl   = document.querySelector('[data-scroll-count]');
+  const target      = counterEl ? parseFloat(counterEl.dataset.scrollCount) : 0;
+  const suffix       = counterEl ? (counterEl.dataset.suffix || '') : '';
+  const len = growthLine.getTotalLength();
+
+  gsap.set(growthLine, { strokeDasharray: len, strokeDashoffset: reduceMotion ? 0 : len });
+
+  if(reduceMotion){
+    gsap.set(growthArea, { opacity:1 });
+    gsap.set(growthDot,  { opacity:1 });
+    gsap.set(growthDot,  { motionPath:{ path: growthLine, align:growthLine, alignOrigin:[0.5,0.5], start:1, end:1 } });
+    if(counterEl) counterEl.textContent = '+' + target + suffix;
+  } else {
+    const counterObj = { val:0 };
+
+    gsap.timeline({
+      scrollTrigger:{
+        trigger: growthCard,
+        start:'top 75%',
+        end:'bottom 40%',
+        scrub:0.6
+      }
+    })
+    .to(growthLine, { strokeDashoffset:0, ease:'none', duration:1 }, 0)
+    .to(growthArea, { opacity:1, ease:'none', duration:1 }, 0)
+    .to(growthDot,  { opacity:1, duration:.05 }, 0)
+    .to(growthDot,  {
+        motionPath:{ path: growthLine, align:growthLine, alignOrigin:[0.5,0.5] },
+        ease:'none',
+        duration:1
+      }, 0)
+    .to(counterObj, {
+        val: target,
+        ease:'none',
+        duration:1,
+        onUpdate: () => { if(counterEl) counterEl.textContent = '+' + Math.round(counterObj.val) + suffix; }
+      }, 0);
+  }
 }
 
 /* ============================================================
