@@ -114,123 +114,148 @@ if(!reduceMotion){
 }
 
 /* ============================================================
-   STORY — "ONE CALL, THEN CHAOS" SCROLLYTELLING SEQUENCE
+   STORY — VERTICAL PHONE EXPERIENCE, WITH SPOKEN NARRATION
    ============================================================ */
-const storyPin = document.querySelector('.story__pin');
+const phoneFrame = document.querySelector('[data-phone-frame]');
 
-if(storyPin && !reduceMotion){
+if(phoneFrame){
 
   // Rotate arms around the shoulder point in absolute SVG coordinates,
   // regardless of the nested translate() transforms on parent groups.
-  gsap.set('.char__arm--left',  { svgOrigin:'156 260' });
-  gsap.set('.char__arm--right', { svgOrigin:'224 260' });
+  gsap.set('.boy__arm--left',  { svgOrigin:'130 240' });
+  gsap.set('.boy__arm--right', { svgOrigin:'190 240' });
 
-  const poses = {
-    1: { left:0,    right:0,   glow:false },
-    2: { left:-140, right:0,   glow:false },
-    3: { left:0,    right:-45, glow:false },
-    4: { left:-165, right:165, glow:true  }
+  const checkPath = document.querySelector('.scene__check');
+  const checkLen  = checkPath ? checkPath.getTotalLength() : 1;
+  gsap.set(checkPath, { strokeDasharray:checkLen, strokeDashoffset:checkLen });
+
+  const scenes = [
+    { caption:'I wish my business could grow.',  duration:4200 },
+    { caption:'Then I found Unfair.',             duration:3600 },
+    { caption:'One call. One decision.',          duration:3600 },
+    { caption:"Now we can't keep up with orders.",duration:4200 },
+    { caption:'This is what unfair feels like.',  duration:999999 }
+  ];
+
+  const armPoses = {
+    1:{ left:0,    right:0   },
+    2:{ left:-40,  right:0   },
+    3:{ left:0,    right:-75 },
+    4:{ left:-150, right:150 },
+    5:{ left:0,    right:0   }
   };
 
-  const tickerValue = document.querySelector('[data-ticker-value]');
-  const tickerTrend = document.querySelector('[data-ticker-trend]');
-  const revenueObj  = { val:4180 };
-  let currentStoryStage = 0;
+  const captionEl = document.querySelector('[data-caption]');
+  const ctaEl     = document.querySelector('[data-story-cta]');
+  const playBtn   = document.querySelector('[data-play-btn]');
+  const muteBtn   = document.querySelector('[data-mute-btn]');
+  const tapZone   = document.querySelector('[data-tap-zone]');
+  const segs      = gsap.utils.toArray('[data-seg]');
 
-  function burstConfetti(){
-    const dots = gsap.utils.toArray('.story__confetti circle');
+  let currentScene = 0;
+  let hasStarted   = false;
+  let muted        = false;
+  let timerId      = null;
+
+  function speak(text){
+    if(muted || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate  = 0.98;
+    utter.pitch = 1.05;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function burstSceneConfetti(){
+    if(reduceMotion) return;
+    const dots = gsap.utils.toArray('.scene__confetti circle');
     gsap.fromTo(dots,
       { opacity:1, scale:0, x:0, y:0 },
       {
-        opacity:0,
-        scale:1,
-        x:() => gsap.utils.random(-110, 110),
-        y:() => gsap.utils.random(-120, 10),
-        duration:1.2,
-        stagger:0.025,
-        ease:'power2.out',
-        overwrite:true
+        opacity:0, scale:1,
+        x:() => gsap.utils.random(-90, 90),
+        y:() => gsap.utils.random(-100, 10),
+        duration:1.1, stagger:0.03, ease:'power2.out', overwrite:true
       }
     );
   }
 
-  function setStoryStage(n){
-    if(n === currentStoryStage) return;
-    currentStoryStage = n;
-    const pose = poses[n];
-
-    gsap.to('.story__bubble', { opacity:0, y:-6, duration:.3, overwrite:true });
-    gsap.to(`.story__bubble[data-stage="${n}"]`, { opacity:1, y:0, duration:.45, delay:.18 });
-
-    document.querySelectorAll('.story__steps li').forEach(li => {
-      const step = Number(li.dataset.step);
-      li.classList.toggle('is-active', step === n);
-      li.classList.toggle('is-done', step < n);
+  function updateProgress(n){
+    segs.forEach((seg, i) => {
+      const step = i + 1;
+      const fill = seg.querySelector('.seg__fill');
+      seg.classList.toggle('is-done', step < n);
+      if(step === n){
+        gsap.set(fill, { width:'0%' });
+        gsap.to(fill, { width:'100%', duration:scenes[n-1].duration / 1000, ease:'none' });
+      } else if(step > n){
+        gsap.set(fill, { width:'0%' });
+      }
     });
+  }
 
-    gsap.to('.char__arm--left',  { rotation: pose.left,  duration:.6, ease:'power2.out' });
-    gsap.to('.char__arm--right', { rotation: pose.right, duration:.6, ease:'power2.out' });
+  function goToScene(n){
+    n = Math.max(1, Math.min(5, n));
+    if(n === currentScene) return;
+    currentScene = n;
+    clearTimeout(timerId);
 
-    gsap.to(['.char__body', '.char__head'], {
-      stroke: pose.glow ? '#C6A15B' : '#5B5D63',
-      fill:   pose.glow ? 'rgba(198,161,91,.12)' : '#1C1F24',
-      duration:.6
-    });
+    gsap.to('.scene-prop', { opacity:0, duration:.3, overwrite:true });
+    gsap.to(`.scene-prop[data-scene="${n}"]`, { opacity:1, duration:.4, delay:.15 });
 
-    gsap.to('.char__mouth--sad',     { opacity: n === 1 ? 1 : 0, duration:.35 });
-    gsap.to('.char__mouth--neutral', { opacity: (n === 2 || n === 3) ? 1 : 0, duration:.35 });
-    gsap.to('.char__mouth--happy',   { opacity: n === 4 ? 1 : 0, duration:.35 });
+    gsap.to('[data-boy]', { opacity: n === 5 ? 0 : 1, duration:.4 });
 
-    gsap.to('.char__phone',    { opacity: n === 2 ? 1 : 0, duration:.35 });
-    gsap.to('.char__contract', { opacity: n === 3 ? 1 : 0, duration:.35 });
+    gsap.to('.boy__arm--left',  { rotation:armPoses[n].left,  duration:.5, ease:'power2.out' });
+    gsap.to('.boy__arm--right', { rotation:armPoses[n].right, duration:.5, ease:'power2.out' });
+
+    gsap.to('.boy__mouth--sad',     { opacity: n === 1 ? 1 : 0, duration:.3 });
+    gsap.to('.boy__mouth--neutral', { opacity: n === 2 ? 1 : 0, duration:.3 });
+    gsap.to('.boy__mouth--happy',   { opacity: n >= 3 ? 1 : 0, duration:.3 });
 
     if(n === 3){
-      gsap.to('.char__check', { strokeDashoffset:0, duration:.5, delay:.2 });
+      gsap.to(checkPath, { strokeDashoffset:0, duration:.5, delay:.3 });
     } else if(n < 3){
-      gsap.set('.char__check', { strokeDashoffset:60 });
+      gsap.set(checkPath, { strokeDashoffset:checkLen });
     }
 
-    if(n === 4){
-      burstConfetti();
-      gsap.to(revenueObj, {
-        val:61400, duration:1.1, ease:'power2.out',
-        onUpdate: () => { tickerValue.textContent = '$' + Math.round(revenueObj.val).toLocaleString(); }
-      });
-      tickerValue.classList.add('is-up');
-      tickerTrend.textContent = '▲ +1,368% MoM';
-      tickerTrend.classList.add('is-up');
-    } else if(n === 3){
-      tickerValue.textContent = 'PROCESSING…';
-      tickerValue.classList.remove('is-up');
-    } else if(n === 2){
-      tickerTrend.textContent = 'status: calling Unfair…';
-    } else if(n === 1){
-      revenueObj.val = 4180;
-      tickerValue.textContent = '$4,180';
-      tickerTrend.textContent = '▼ 6% MoM';
-      tickerValue.classList.remove('is-up');
-      tickerTrend.classList.remove('is-up');
+    if(n === 4){ burstSceneConfetti(); }
+
+    captionEl.textContent = scenes[n-1].caption;
+    ctaEl.classList.toggle('is-visible', n === 5);
+
+    updateProgress(n);
+    speak(scenes[n-1].caption);
+
+    if(n < 5){
+      timerId = setTimeout(() => goToScene(n + 1), scenes[n-1].duration);
     }
   }
 
-  setStoryStage(1);
-
-  ScrollTrigger.create({
-    trigger: storyPin,
-    start:'top top',
-    end:'+=3000',
-    pin:true,
-    scrub:0.5,
-    onUpdate: self => {
-      const p = self.progress;
-      let n;
-      if(p < 0.2)       n = 1;
-      else if(p < 0.46) n = 2;
-      else if(p < 0.72) n = 3;
-      else              n = 4;
-      setStoryStage(n);
-    }
+  playBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    hasStarted = true;
+    playBtn.classList.add('is-hidden');
+    goToScene(1);
   });
+
+  tapZone.addEventListener('click', e => {
+    if(!hasStarted) return;
+    if(e.target.closest('[data-mute-btn]') || e.target.closest('[data-story-cta]') || e.target.closest('[data-play-btn]')) return;
+    const rect  = tapZone.getBoundingClientRect();
+    const relX  = (e.clientX - rect.left) / rect.width;
+    goToScene(relX < 0.35 ? currentScene - 1 : currentScene + 1);
+  });
+
+  muteBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    muted = !muted;
+    muteBtn.classList.toggle('is-muted', muted);
+    muteBtn.setAttribute('aria-pressed', String(muted));
+    if(muted){ window.speechSynthesis && window.speechSynthesis.cancel(); }
+    else if(hasStarted){ speak(scenes[currentScene-1].caption); }
+  });
+
+  ctaEl.addEventListener('click', e => { e.stopPropagation(); });
 }
 
 /* ============================================================
