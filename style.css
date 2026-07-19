@@ -371,6 +371,88 @@ button{ font-family:inherit; background:none; border:none; cursor:pointer; color
 }
 
 /* ============================================================
+   STORY — SCROLLYTELLING CHARACTER SEQUENCE
+   ============================================================ */
+.story{ padding:6rem 0 2rem; max-width:var(--container); margin:0 auto; }
+
+.story__pin{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  gap:3rem;
+  padding:2rem 2.5rem;
+  flex-wrap:wrap;
+}
+
+.story__svg{ flex:1 1 540px; width:100%; max-width:640px; height:auto; overflow:visible; }
+
+.char__body,.char__head{
+  fill:var(--ink-3); stroke:var(--text-muted); stroke-width:3;
+  transition:none;
+}
+.char__mouth{ fill:none; stroke:var(--text-muted); stroke-width:3; stroke-linecap:round; }
+.char__arm line{ stroke:var(--text-muted); stroke-width:6; stroke-linecap:round; }
+.char__leg{ stroke:var(--text-muted); stroke-width:6; stroke-linecap:round; }
+
+.char__phone rect{ fill:var(--ink-3); stroke:var(--text-muted); stroke-width:2; }
+.char__phone .char__wave{ fill:none; stroke:var(--text-dim); stroke-width:2; stroke-linecap:round; }
+
+.char__contract rect{ fill:var(--ink-3); stroke:var(--text-muted); stroke-width:2; }
+.char__contract line{ stroke:var(--text-dim); stroke-width:2; }
+.char__check{
+  fill:none; stroke:var(--brass); stroke-width:3;
+  stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:60; stroke-dashoffset:60;
+}
+
+.story__confetti circle{ fill:var(--brass-2); opacity:0; }
+
+.story__bubble rect{ fill:var(--ink-3); stroke:var(--line-2); stroke-width:1; }
+.story__bubble text{ fill:var(--text); font-family:var(--font-body); font-size:15px; }
+
+.story__side{
+  flex:0 0 240px;
+  display:flex;
+  flex-direction:column;
+  gap:2.6rem;
+}
+
+.story__ticker{ font-family:var(--font-mono); }
+.ticker__label{ display:block; font-size:.7rem; letter-spacing:.1em; color:var(--text-dim); margin-bottom:.6rem; }
+.ticker__value{
+  display:block; font-family:var(--font-display); font-weight:700;
+  font-size:2rem; color:var(--text); transition:color .4s var(--ease-out);
+}
+.ticker__value.is-up{ color:var(--brass); }
+.ticker__trend{ display:block; font-size:.8rem; color:var(--text-dim); margin-top:.5rem; }
+.ticker__trend.is-up{ color:var(--brass-2); }
+
+.story__steps{
+  display:flex; flex-direction:column; gap:1rem;
+  font-family:var(--font-mono); font-size:.78rem; letter-spacing:.08em; color:var(--text-dim);
+}
+.story__steps li{ position:relative; padding-left:1.5rem; transition:color .3s var(--ease-out); }
+.story__steps li::before{
+  content:''; position:absolute; left:0; top:50%; width:8px; height:8px;
+  margin-top:-4px; border-radius:50%; background:var(--text-dim);
+  transition:background .3s var(--ease-out);
+}
+.story__steps li.is-active{ color:var(--text); }
+.story__steps li.is-active::before{ background:var(--brass); }
+.story__steps li.is-done{ color:var(--text-muted); }
+.story__steps li.is-done::before{ background:var(--brass); opacity:.5; }
+
+.story__fallback{ display:none; color:var(--text-muted); font-size:.95rem; margin:0 2.5rem 3rem; }
+
+body.reduced-motion .story__pin{ display:none; }
+body.reduced-motion .story__fallback{ display:block; }
+
+@media (max-width:760px){
+  .story__pin{ padding:1rem 1.5rem; }
+  .story__side{ flex:1 1 100%; }
+}
+
+/* ============================================================
    PROOF / TILT CARDS
    ============================================================ */
 .proof{ padding:6rem 0 9rem; max-width:var(--container); margin:0 auto; }
